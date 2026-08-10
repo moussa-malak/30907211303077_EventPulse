@@ -1,6 +1,6 @@
 const User = require("../models/user");
 const ok = require("../utils/ok");
-const asyncHandler = require("../middleware/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/appError");
 const getAllUsers = asyncHandler(async (req, res, next) => {
   const users = await User.find({});

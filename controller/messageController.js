@@ -1,6 +1,6 @@
 const Message = require("../models/massegeModules");
 const Event = require("../models/eventModules");
-const asyncHandler = require("../middleware/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/appError");
 const ok = require("../utils/ok");
 const io = require("socket.io");

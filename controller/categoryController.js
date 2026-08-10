@@ -3,7 +3,7 @@ const router = express.Router();
 const categoryValidator = require("../middleware/validator/categoryValidator");
 const categoryController = require("../controller/categoryController");
 const category = require("../models/categoryModule");
-const asyncHandeller = require("../middleware/asyncHandler");
+const asyncHandeller = require("../utils/asyncHandler");
 const ok = require("../utils/ok");
 const appError = require("../utils/appError");
 
