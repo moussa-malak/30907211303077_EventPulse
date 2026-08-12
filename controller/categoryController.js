@@ -1,7 +1,4 @@
-const express = require("express");
-const router = express.Router();
 const categoryValidator = require("../middleware/validator/categoryValidator");
-const categoryController = require("../controller/categoryController");
 const category = require("../models/categoryModule");
 const asyncHandeller = require("../utils/asyncHandler");
 const ok = require("../utils/ok");
@@ -20,8 +17,8 @@ const getAllCategories = asyncHandeller(async (req, res, next) => {
   const filter = {};
   if (search) filter.name = { $regex: search, $options: "i" };
 
-  const page = Math.max(1, parseInt(pageQ) || 1);
-  const limit = Math.min(50, parseInt(limitQ) || 10);
+  const page = Math.max(1, parseInt(pageQ, 10) || 1);
+  const limit = Math.min(50, parseInt(limitQ, 10) || 10);
   const skip = (page - 1) * limit;
   const allowedFields = ["name", "description"];
   const allowedSortFields = ["name", "description", "createdAt"];
@@ -38,7 +35,7 @@ const getAllCategories = asyncHandeller(async (req, res, next) => {
     if (requested.length > 0) selectStr = requested.join(" ");
   }
 
-  const [categoryList] = await Promise.all([
+  const [categoryList, totalCount] = await Promise.all([
     category
       .find(filter)
       .sort({ [sortField]: sortOrder })
@@ -49,7 +46,22 @@ const getAllCategories = asyncHandeller(async (req, res, next) => {
     category.countDocuments(filter),
   ]);
 
-  return ok(res, categoryList, "this is list of all categories ", 200);
+  const totalPages = Math.ceil(totalCount / limit);
+
+  return ok(
+    res,
+    {
+      metadata: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages,
+      },
+      data: categoryList,
+    },
+    "this is list of all categories",
+    200
+  );
 });
 
 ///////////////////////////////////////////

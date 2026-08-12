@@ -1,8 +1,19 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const http = require("http");
-const { Server } = require("socket.io");
+const morgan = require("morgan");
+const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const errhandeler = require("./utils/errorHandeler");
+let Server = null;
+
+try {
+  ({ Server } = require("socket.io"));
+} catch (error) {
+  console.warn(
+    "Socket.IO is not available. Realtime features will be disabled.",
+  );
+}
 
 const app = express();
 dotenv.config();
@@ -15,30 +26,50 @@ const eventRoutes = require("./routes/eventRoutes");
 const userRoutes = require("./routes/userRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const regstrationRoutes = require("./routes/regstrationRoutes");
 const loginRoutes = require("./routes/loginRoutes");
 const signUpRoutes = require("./routes/signUpRoutes");
 
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev")); // clear and colorful in development
+} else {
+  app.use(morgan("combined")); // full and detailed in production
+}
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(errhandeler);
 
-app.get("/health", (_req, res) => {
+app.get("/health/detailed", (req, res) => {
+  const dbStatus =
+    mongoose.connection.readyState === 1 ? "connected" : "disconnected";
+
   res.status(200).json({
     status: "ok",
-    message: "EventPulse backend is running",
+    environment: process.env.NODE_ENV,
+    uptime: `${Math.floor(process.uptime())} seconds`,
+    database: dbStatus,
     timestamp: new Date().toISOString(),
   });
 });
 
-app.get("/api-docs", (_req, res) => {
+app.get("/api-docs", (req, res) => {
   res.status(200).json({
     message: "EventPulse API docs are available in the project documentation.",
-    endpoints: ["/user", "/events", "/category", "/messages", "/login", "/signup"],
+    endpoints: [
+      "/user",
+      "/events",
+      "/category",
+      "/messages",
+      "/login",
+      "/signup",
+    ],
   });
 });
 
 app.use("/user", userRoutes);
 app.use("/events", eventRoutes);
 app.use("/category", categoryRoutes);
+app.use("/regstration", regstrationRoutes);
 app.use("/messages", messageRoutes);
 app.use("/login", loginRoutes);
 app.use("/signup", signUpRoutes);
@@ -56,63 +87,69 @@ app.use((err, req, res, _next) => {
 });
 
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: true,
-    methods: ["GET", "POST"],
-  },
-});
+let io = null;
 
-app.set("io", io);
+if (Server) {
+  io = new Server(server, {
+    cors: {
+      origin: true,
+      methods: ["GET", "POST"],
+    },
+  });
 
-const authenticateSocket = (socket) => {
-  const authHeader = socket.handshake.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null;
-  }
+  app.set("io", io);
 
-  const token = authHeader.split(" ")[1];
-  try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
-    return null;
-  }
-};
+  const authenticateSocket = (socket) => {
+    const authHeader = socket.handshake.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return null;
+    }
 
-io.on("connection", (socket) => {
-  const user = authenticateSocket(socket);
-  console.log("Socket connected:", socket.id);
+    const token = authHeader.split(" ")[1];
+    try {
+      return jwt.verify(token, JWT_SECRET);
+    } catch (error) {
+      return null;
+    }
+  };
 
-  if (!user) {
-    socket.emit("auth_error", { message: "Unauthorized socket connection" });
-    socket.disconnect(true);
-    return;
-  }
+  io.on("connection", (socket) => {
+    const user = authenticateSocket(socket);
+    console.log("Socket connected:", socket.id);
 
-  socket.on("joinRoom", ({ eventId }) => {
-    if (!eventId) {
-      socket.emit("room_error", { message: "Event ID is required" });
+    if (!user) {
+      socket.emit("auth_error", { message: "Unauthorized socket connection" });
+      socket.disconnect(true);
       return;
     }
 
-    socket.join(eventId.toString());
-    console.log(`Socket ${socket.id} joined event room ${eventId}`);
-  });
+    socket.on("joinRoom", ({ eventId }) => {
+      if (!eventId) {
+        socket.emit("room_error", { message: "Event ID is required" });
+        return;
+      }
 
-  socket.on("leaveRoom", ({ eventId }) => {
-    if (!eventId) {
-      socket.emit("room_error", { message: "Event ID is required" });
-      return;
-    }
+      socket.join(eventId.toString());
+      console.log(`Socket ${socket.id} joined event room ${eventId}`);
+    });
 
-    socket.leave(eventId.toString());
-    console.log(`Socket ${socket.id} left event room ${eventId}`);
-  });
+    socket.on("leaveRoom", ({ eventId }) => {
+      if (!eventId) {
+        socket.emit("room_error", { message: "Event ID is required" });
+        return;
+      }
 
-  socket.on("disconnect", () => {
-    console.log("Socket disconnected:", socket.id);
+      socket.leave(eventId.toString());
+      console.log(`Socket ${socket.id} left event room ${eventId}`);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Socket disconnected:", socket.id);
+    });
   });
-});
+} else {
+  app.set("io", null);
+}
 
 const startServer = async () => {
   try {

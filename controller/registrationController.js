@@ -1,6 +1,6 @@
 const registration = require("../models/registrationModule");
 const Event = require("../models/eventModules");
-const asyncHandeller = require("../middleware/asyncHandler");
+const asyncHandeller = require("../utils/asyncHandler");
 const ok = require("../utils/ok");
 const AppError = require("../utils/appError");
 
@@ -19,7 +19,34 @@ const getAllregs = asyncHandeller(async (req, res, next) => {
     fields,
   } = req.query;
   const filter = { user: userId };
-  if (search) filter["event.name"] = { $regex: search, $options: "i" };
+
+  if (search) {
+    const matchingEvents = await Event.find(
+      {
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+        ],
+      },
+      "_id",
+    ).lean();
+
+    if (matchingEvents.length === 0) {
+      const page = Math.max(1, parseInt(pageQ) || 1);
+      const limit = Math.min(50, parseInt(limitQ) || 10);
+      return ok(res, [], "Current user registrations retrieved successfully", {
+        events: [],
+        pagination: {
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+        },
+      });
+    }
+
+    filter.event = { $in: matchingEvents.map((evt) => evt._id) };
+  }
 
   const page = Math.max(1, parseInt(pageQ) || 1);
   const limit = Math.min(50, parseInt(limitQ) || 10);
@@ -51,9 +78,7 @@ const getAllregs = asyncHandeller(async (req, res, next) => {
       .lean(),
     registration.countDocuments(filter),
   ]);
-
   ok(res, registrations, "Current user registrations retrieved successfully", {
-    events: registrations,
     pagination: {
       total,
       page,
@@ -63,14 +88,18 @@ const getAllregs = asyncHandeller(async (req, res, next) => {
   });
 });
 ////////////////////////////////////////////////////////////
+const mongoose = require("mongoose");
+
 const getRegById = asyncHandeller(async (req, res, next) => {
-  const { id } = req.params;
+  let { id } = req.params;
+  // normalize when id might be passed as an object like { id: '...' }
+  if (typeof id === "object" && id?.id) id = id.id;
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return next(new AppError("Invalid registration id", 400));
   const userId = getUserId(req);
   if (!userId) return next(new AppError("Unauthorized", 401));
 
-  const populatedReg = await registration
-    .findOne({ _id: id, user: userId })
-    .populate("event user");
+  const populatedReg = await registration.findById(id).populate("event user");
 
   if (!populatedReg) {
     return next(new AppError("registration not found", 404));
@@ -91,7 +120,7 @@ const deleteReg = asyncHandeller(async (req, res, next) => {
     return next(new AppError("registration not found", 404));
   }
 
-  await Event.findByIdAndUpdate(deletedReg.event, {
+  await Event.findByIdAndUpdate(deletedReg.event?._id || deletedReg.event, {
     $inc: { registeredCount: -1 },
   });
 
@@ -102,6 +131,7 @@ const createReg = asyncHandeller(async (req, res, next) => {
   const userId = getUserId(req);
   if (!userId) return next(new AppError("Unauthorized", 401));
 
+  // expect body to contain an event id (e.g. { event: 'eventId' })
   const { event } = req.body;
 
   const existingEvent = await Event.findById(event);
@@ -124,9 +154,9 @@ const createReg = asyncHandeller(async (req, res, next) => {
     return next(new AppError("New registration blocked: event is full", 400));
   }
 
-  const reg = await registration.create({ event, user: userId });
+  const newRegistration = await registration.create({ event, user: userId });
   const populatedReg = await registration
-    .findById(reg._id)
+    .findById(newRegistration._id)
     .populate("event user");
   ok(res, populatedReg, "The registration created successfully");
 });

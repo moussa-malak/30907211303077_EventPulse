@@ -1,16 +1,24 @@
+const mongoose = require("mongoose");
 const Message = require("../models/massegeModules");
 const Event = require("../models/eventModules");
 const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/appError");
 const ok = require("../utils/ok");
-const io = require("socket.io");
 
 const createAnnouncement = asyncHandler(async (req, res, next) => {
   const senderId = req.user?.id || req.user?._id;
-  const { eventId, content } = req.body;
+  const { eventId: bodyEventId, event: bodyEvent, content } = req.body || {};
+  const eventId = bodyEventId || bodyEvent;
+  const io = req.app.get("io");
 
   if (!senderId) {
     return next(new AppError("Unauthorized", 401));
+  }
+  if (!eventId || content == null) {
+    return next(new AppError("eventId and content are required", 400));
+  }
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    return next(new AppError("Invalid eventId", 400));
   }
 
   const event = await Event.findById(eventId);
@@ -43,6 +51,9 @@ const getMessagesByEvent = asyncHandler(async (req, res, next) => {
 
   if (!attendeeId) {
     return next(new AppError("Unauthorized", 401));
+  }
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    return next(new AppError("Invalid eventId", 400));
   }
 
   const event = await Event.findById(eventId);
