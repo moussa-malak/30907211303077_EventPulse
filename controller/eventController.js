@@ -4,17 +4,15 @@ const Event = require("../models/eventModules");
 const asyncHandler = require("../utils/asyncHandler");
 const eventvalidator = require("../middleware/validator/eventValidator");
 const AppError = require("../utils/appError");
+const ok = require("../utils/ok");
 
 const createEvent = asyncHandler(async (req, res, next) => {
   const { name, description, date, location, category, ticketPrice, capacity } =
     req.body;
-  const userId = req.user?._id || req.user?.id;
-  if (userId) req.body.createdBy = userId;
 
   const event = await Event.create(req.body);
-  const populatedEvent = await Event.findById(event._1d).populate("category");
-
-  return res.status(201).json(populatedEvent);
+  const populatedEvent = await Event.findById(event._id).populate("category");
+  return ok(res, populatedEvent, "event created successfully");
 });
 /////////////////////////////////////////////////
 const getAllEvents = asyncHandler(async (req, res, next) => {

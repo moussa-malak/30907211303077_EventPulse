@@ -3,12 +3,12 @@ const ok = require("../utils/ok");
 const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/appError");
 const getAllUsers = asyncHandler(async (req, res, next) => {
-  const users = await User.find({});
+  const users = await User.find({}).select("-password");
   ok(res, users, "List of all users");
 });
 
 const getUserById = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.params.id);
+  const user = await User.findById(req.params.id).select("-password");
   if (!user) {
     throw new AppError("user not found", 404);
   }
@@ -29,7 +29,9 @@ const updateUser = asyncHandler(async (req, res, next) => {
   if (role !== undefined) user.role = role;
 
   await user.save();
-  return ok(res, user, "user info updated successfully");
+  const userResponse = user.toObject();
+  delete userResponse.password;
+  return ok(res, userResponse, "user info updated successfully");
 });
 
 const deleteUser = asyncHandler(async (req, res, next) => {
@@ -38,7 +40,9 @@ const deleteUser = asyncHandler(async (req, res, next) => {
     throw new AppError("user not found", 404);
   }
   await user.deleteOne();
-  return ok(res, user, "user info deleted successfully");
+  const userResponse = user.toObject();
+  delete userResponse.password;
+  return ok(res, userResponse, "user info deleted successfully");
 });
 
 module.exports = {

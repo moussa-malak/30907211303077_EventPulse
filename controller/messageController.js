@@ -60,10 +60,13 @@ const getMessagesByEvent = asyncHandler(async (req, res, next) => {
   if (!event) {
     return next(new AppError("Event not found", 404));
   }
-
   const messages = await Message.find({ event: eventId })
     .populate("sender", "name email")
     .sort({ createdAt: 1 });
+
+  if (messages.length === 0) {
+    return next(new AppError("no message for this event now", 404));
+  }
 
   return ok(res, messages, "Event announcements retrieved successfully");
 });

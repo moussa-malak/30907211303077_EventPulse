@@ -70,7 +70,7 @@ const getAllregs = asyncHandeller(async (req, res, next) => {
     registration
       .find(filter)
       .populate("event")
-      .populate("user")
+      .populate("user", "-password")
       .sort({ [sortField]: sortOrder })
       .skip(skip)
       .limit(limit)
@@ -99,7 +99,7 @@ const getRegById = asyncHandeller(async (req, res, next) => {
   const userId = getUserId(req);
   if (!userId) return next(new AppError("Unauthorized", 401));
 
-  const populatedReg = await registration.findById(id).populate("event user");
+  const populatedReg = await registration.findById(id).populate("event").populate("user", "-password");
 
   if (!populatedReg) {
     return next(new AppError("registration not found", 404));
@@ -114,7 +114,8 @@ const deleteReg = asyncHandeller(async (req, res, next) => {
 
   const deletedReg = await registration
     .findOneAndDelete({ _id: id, user: userId })
-    .populate("event user");
+    .populate("event")
+    .populate("user", "-password");
 
   if (!deletedReg) {
     return next(new AppError("registration not found", 404));
@@ -157,7 +158,8 @@ const createReg = asyncHandeller(async (req, res, next) => {
   const newRegistration = await registration.create({ event, user: userId });
   const populatedReg = await registration
     .findById(newRegistration._id)
-    .populate("event user");
+    .populate("event")
+    .populate("user", "-password");
   ok(res, populatedReg, "The registration created successfully");
 });
 ///////////////////////////////////////////////////////////////

@@ -1,0 +1,623 @@
+{
+  "info": {
+    "_postman_id": "90d5882e-28d0-474a-b808-3722cc9a3589",
+    "name": "event Pulse",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55885106",
+    "_collection_link": "https://go.postman.co/collection/55885106-90d5882e-28d0-474a-b808-3722cc9a3589?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "sign up",
+      "item": [
+        {
+          "name": "create Account",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\" :\"mosmos\",\r\n    \"email\":\"mosmos@123.com\",\r\n    \"password\":\"147893281478\",\r\n    \"role\":\"admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base url}}/signup/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "signup",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "login",
+      "item": [
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\":\"mosmos@123.com\",\r\n    \"password\":\"147893281478\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base url}}/login/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "login",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "category",
+      "item": [
+        {
+          "name": "get all category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supabase_service_role_api_key_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base url}}/category/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "category",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get category by id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_secret_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base url}}/category/6a7f214de1f3f5f8be230e1a",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "category",
+                "6a7f214de1f3f5f8be230e1a"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create New Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"crash courses\",\r\n    \"description\":\"many useful courses\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base url}}/category/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "category",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update category by id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supabase_service_role_api_key_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"description\":\"many useful courses for everyone\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base url}}/category/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "category",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete category by id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_secret_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base url}}/category/6a7ef883612bf44d176e69fd",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "category",
+                "6a7ef883612bf44d176e69fd"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "event",
+      "item": [
+        {
+          "name": "get all events",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_secret_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base url}}/events/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get the event by id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supabase_service_role_api_key_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base url}}/events/6a7ef689612bf44d176e69f9",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "events",
+                "6a7ef689612bf44d176e69f9"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create new event",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supabase_service_role_api_key_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"design course\",\r\n    \"date\": \"30/8/2026\",\r\n    \"location\": \"cairo university\",\r\n    \"description\": \"it is a crash course to learn the basics of design \",\r\n    \"category\": \"6a7ef957612bf44d176e69fe\",\r\n    \"capacity\": 1750,\r\n    \"ticketPrice\": 200\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base url}}/events/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "edit event",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"description\":\"it's a useful course for everyone want learning design \"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base url}}/events/6a7f1ceb67172bbc9992ace6",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "events",
+                "6a7f1ceb67172bbc9992ace6"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete event",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base url}}/events/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "events",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "registration",
+      "item": [
+        {
+          "name": "get all regstrations",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base url}}/regstration/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "regstration",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get regstration by id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base url}}/regstration/6a7ca2cb8de6b3e6c017bccf",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "regstration",
+                "6a7ca2cb8de6b3e6c017bccf"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create regstration",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_secret_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"event\":\"6a7f1e482653661415d831a2\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base url}}/regstration/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "regstration",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete regstration",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{json_web_token_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base url}}/regstration/6a7ca2cb8de6b3e6c017bccf",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "regstration",
+                "6a7ca2cb8de6b3e6c017bccf"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "message",
+      "item": [
+        {
+          "name": "get all messages",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{supabase_service_role_api_key_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base url}}/messages/6a7f214de1f3f5f8be230e1d",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "messages",
+                "6a7f214de1f3f5f8be230e1d"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create message",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_secret_17b8}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"eventId\":\"6a7f214de1f3f5f8be230e1d\",\r\n    \"content\":\"hi every one\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base url}}/messages/",
+              "host": [
+                "{{base url}}"
+              ],
+              "path": [
+                "messages",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "supabase_service_role_api_key_17b8",
+      "secret": true
+    },
+    {
+      "key": "auth_secret_17b8",
+      "secret": true
+    },
+    {
+      "key": "json_web_token_17b8",
+      "secret": true
+    }
+  ]
+}
