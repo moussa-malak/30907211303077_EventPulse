@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "scripts": {
-    "test": "jest",
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "exit": "jest --detectOpenHandles"
-  },
+"scripts": {
+  "test": "jest",
+  "start": "node app.js",
+  "dev": "nodemon app.js",
+  "seed": "node runSeed.js",
+  "test:watch": "jest --watch",
+  "test:coverage": "jest --coverage",
+  "exit": "jest --detectOpenHandles"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",

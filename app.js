@@ -37,7 +37,7 @@ if (process.env.NODE_ENV === "development") {
 }
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(errhandeler);
+
 
 app.get("/health/detailed", (req, res) => {
   const dbStatus =
@@ -85,7 +85,7 @@ app.use((err, req, res, _next) => {
     message: err.message || "Internal server error",
   });
 });
-
+app.use(errhandeler);
 const server = http.createServer(app);
 let io = null;
 
