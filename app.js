@@ -38,7 +38,6 @@ if (process.env.NODE_ENV === "development") {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.get("/health/detailed", (req, res) => {
   const dbStatus =
     mongoose.connection.readyState === 1 ? "connected" : "disconnected";
@@ -51,7 +50,21 @@ app.get("/health/detailed", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+app.get("/health/db", async (req, res) => {
+  try {
+    await connectDB();
 
+    res.json({
+      database: "connected",
+      readyState: mongoose.connection.readyState,
+    });
+  } catch (error) {
+    res.status(500).json({
+      database: "disconnected",
+      error: error.message,
+    });
+  }
+});
 app.get("/api-docs", (req, res) => {
   res.status(200).json({
     message: "EventPulse API docs are available in the project documentation.",
@@ -85,24 +98,14 @@ app.use((err, req, res, _next) => {
     message: err.message || "Internal server error",
   });
 });
-app.get("/health/db", async (req, res) => {
-  try {
-    await connectDB();
 
-    res.json({
-      database: "connected",
-      readyState: mongoose.connection.readyState
-    });
-  } catch (error) {
-    res.status(500).json({
-      database: "disconnected",
-      error: error.message
-    });
-  }
-});
 app.use(errhandeler);
 const server = http.createServer(app);
 let io = null;
+
+connectDB().catch((error) => {
+  console.error("Database connection failed during app bootstrap:", error);
+});
 
 if (Server) {
   io = new Server(server, {

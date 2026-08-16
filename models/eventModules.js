@@ -24,11 +24,11 @@ const eventSchema = new mongoose.Schema(
     },
     capacity: {
       type: Number,
-      required: true,
+      default: 0,
     },
     ticketPrice: {
       type: Number,
-      required: true,
+      default: 0,
     },
     registeredCount: {
       type: Number,

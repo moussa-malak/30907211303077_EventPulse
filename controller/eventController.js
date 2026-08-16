@@ -43,22 +43,12 @@ const createEvent = asyncHandler(async (req, res, next) => {
   const description = payload.description || payload.summary;
   const date = payload.date;
   const location = payload.location || payload.place;
-  const ticketPrice = payload.ticketPrice ?? payload.price;
-  const capacity = payload.capacity;
+  const ticketPrice = payload.ticketPrice ?? payload.price ?? 0;
+  const capacity = payload.capacity ?? 0;
 
-  if (
-    !name ||
-    !description ||
-    !date ||
-    !location ||
-    ticketPrice == null ||
-    capacity == null
-  ) {
+  if (!name || !description || !date || !location) {
     return next(
-      new AppError(
-        "name, description, date, location, ticketPrice, and capacity are required",
-        400,
-      ),
+      new AppError("name, description, date, and location are required", 400),
     );
   }
 
@@ -75,7 +65,7 @@ const createEvent = asyncHandler(async (req, res, next) => {
   });
 
   const populatedEvent = await Event.findById(event._id).populate("category");
-  return ok(res, populatedEvent, "event created successfully");
+  return res.status(201).json(populatedEvent);
 });
 /////////////////////////////////////////////////
 const getAllEvents = asyncHandler(async (req, res, next) => {
