@@ -28,7 +28,7 @@ npm run dev
 ```
 
 Server runs on http://localhost:5000
-
+deploment link : https://30907211303077-event-pulse.vercel.app
 ## What's Built In
 
 - Events - Create/read/update/delete events
