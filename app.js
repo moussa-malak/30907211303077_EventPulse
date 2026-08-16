@@ -38,6 +38,21 @@ if (process.env.NODE_ENV === "development") {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("Database connection failed:", error.message);
+
+    res.status(503).json({
+      status: "error",
+      message: "Database connection failed",
+      error: error.message,
+    });
+  }
+});
+
 app.get("/health/detailed", (req, res) => {
   const dbStatus =
     mongoose.connection.readyState === 1 ? "connected" : "disconnected";
@@ -103,9 +118,7 @@ app.use(errhandeler);
 const server = http.createServer(app);
 let io = null;
 
-connectDB().catch((error) => {
-  console.error("Database connection failed during app bootstrap:", error);
-});
+
 
 if (Server) {
   io = new Server(server, {
