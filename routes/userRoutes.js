@@ -10,13 +10,15 @@ const requireAuth = require("../middleware/requireAuth");
 const requireRole = require("../middleware/requireRole");
 router.use(express.json());
 
-
-router.use(requireAuth);
-router.use(requireRole);
-router.get("/", getAllUsers);
-router.get("/:id", getUserById);
-router.put("/:id", updateUser);
-router.delete("/:id", deleteUser);
-router.use(userValidator);
+router.get("/", requireAuth, getAllUsers);
+router.get("/:id", requireAuth, getUserById);
+router.put(
+  "/:id",
+  requireAuth,
+  requireRole("admin"),
+  userValidator,
+  updateUser,
+);
+router.delete("/:id", requireAuth, requireRole("admin"), deleteUser);
 
 module.exports = router;

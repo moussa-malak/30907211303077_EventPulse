@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET || "eventpulse-dev-secret";
+
 const requireAuth = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -9,7 +11,7 @@ const requireAuth = (req, res, next) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {
@@ -19,4 +21,4 @@ const requireAuth = (req, res, next) => {
   }
 };
 
-module.exports = requireAuth ;
+module.exports = requireAuth;

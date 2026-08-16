@@ -85,6 +85,21 @@ app.use((err, req, res, _next) => {
     message: err.message || "Internal server error",
   });
 });
+app.get("/health/db", async (req, res) => {
+  try {
+    await connectDB();
+
+    res.json({
+      database: "connected",
+      readyState: mongoose.connection.readyState
+    });
+  } catch (error) {
+    res.status(500).json({
+      database: "disconnected",
+      error: error.message
+    });
+  }
+});
 app.use(errhandeler);
 const server = http.createServer(app);
 let io = null;

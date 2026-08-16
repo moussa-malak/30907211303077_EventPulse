@@ -1,16 +1,79 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const Event = require("../models/eventModules");
+const Category = require("../models/categoryModule");
 const asyncHandler = require("../utils/asyncHandler");
 const eventvalidator = require("../middleware/validator/eventValidator");
 const AppError = require("../utils/appError");
 const ok = require("../utils/ok");
 
-const createEvent = asyncHandler(async (req, res, next) => {
-  const { name, description, date, location, category, ticketPrice, capacity } =
-    req.body;
+const resolveCategoryId = async (categoryValue) => {
+  if (!categoryValue) return null;
 
-  const event = await Event.create(req.body);
+  if (mongoose.Types.ObjectId.isValid(categoryValue)) {
+    return categoryValue;
+  }
+
+  const categoryDoc = await Category.findOne({
+    name: {
+      $regex: new RegExp(
+        `^${categoryValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+        "i",
+      ),
+    },
+  });
+
+  if (categoryDoc) {
+    return categoryDoc._id.toString();
+  }
+
+  const created = await Category.create({
+    name: String(categoryValue),
+    description: `Auto-created category for ${categoryValue}`,
+  });
+
+  return created._id.toString();
+};
+
+const createEvent = asyncHandler(async (req, res, next) => {
+  const payload = req.body || {};
+  const rawCategory = payload.category;
+  const name = payload.name || payload.title;
+  const description = payload.description || payload.summary;
+  const date = payload.date;
+  const location = payload.location || payload.place;
+  const ticketPrice = payload.ticketPrice ?? payload.price;
+  const capacity = payload.capacity;
+
+  if (
+    !name ||
+    !description ||
+    !date ||
+    !location ||
+    ticketPrice == null ||
+    capacity == null
+  ) {
+    return next(
+      new AppError(
+        "name, description, date, location, ticketPrice, and capacity are required",
+        400,
+      ),
+    );
+  }
+
+  const categoryId = await resolveCategoryId(rawCategory || "general");
+
+  const event = await Event.create({
+    name,
+    description,
+    date,
+    location,
+    category: categoryId,
+    ticketPrice,
+    capacity,
+  });
+
   const populatedEvent = await Event.findById(event._id).populate("category");
   return ok(res, populatedEvent, "event created successfully");
 });
@@ -33,7 +96,27 @@ const getAllEvents = asyncHandler(async (req, res, next) => {
     fields,
   } = req.query;
   const filter = {};
-  if (category) filter.category = category;
+  if (category) {
+    const normalized = String(category).trim();
+    if (mongoose.Types.ObjectId.isValid(normalized)) {
+      filter.category = normalized;
+    } else {
+      const categoryDoc = await Category.findOne({
+        name: {
+          $regex: new RegExp(
+            `^${normalized.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+            "i",
+          ),
+        },
+      });
+
+      if (!categoryDoc) {
+        return res.status(200).json([]);
+      }
+
+      filter.category = categoryDoc._id;
+    }
+  }
   if (city) filter.location = { $regex: city, $options: "i" };
 
   // numeric range filters

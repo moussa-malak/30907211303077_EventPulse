@@ -9,10 +9,9 @@ const {
 const requireAuth = require("../middleware/requireAuth");
 const requireRole = require("../middleware/requireRole");
 
-router.use(requireAuth);
-router.get("/", getAllregs);
-router.get("/:id", getRegById);
-router.post("/" , createReg);
-router.delete("/:id", deleteReg);
+router.get("/", requireAuth, getAllregs);
+router.get("/:id", requireAuth, getRegById);
+router.post("/", createReg);
+router.delete("/:id", requireAuth, requireRole("admin"), deleteReg);
 
 module.exports = router;
